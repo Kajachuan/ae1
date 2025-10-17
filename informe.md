@@ -1,15 +1,16 @@
-# Optimización Evolutiva de Disposición de Moldes en una Tela
+# Optimización evolutiva de disposición de moldes en una tela
 
-**Autor:** Kevin André Cajachuán Arroyo - A1606  
+**Alumno:** Kevin André Cajachuán Arroyo - A1606  
 **Materia:** Algoritmos Evolutivos I (MIA - FIUBA)  
 **Técnica aplicada:** Algoritmos Genéticos (GA)  
-**Fecha:** Octubre 2025  
+**Fecha:** 17/10/2025  
+**Repositorio:** [https://github.com/Kajachuan/ae1](https://github.com/Kajachuan/ae1)
 
 ---
 
 ## 1. Descripción del problema
 
-El objetivo del trabajo consiste en **optimizar la disposición de moldes textiles sobre una tela** para minimizar el **ancho total utilizado**, simulando un proceso de corte eficiente.  
+El objetivo del trabajo consiste en **optimizar la disposición de moldes textiles sobre una tela** para minimizar el **largo total utilizado**, simulando un proceso de corte eficiente.  
 Cada molde corresponde a una pieza de una prenda y el conjunto de piezas debe disponerse dentro de una franja de altura fija, evitando solapamientos y respetando la geometría real de cada figura.
 
 Este problema pertenece a la familia de los **problemas de empaquetado bidimensional (2D bin packing)**, los cuales son combinatorios y de naturaleza **NP-hard**, por lo que resultan adecuados para abordarse mediante algoritmos evolutivos.
@@ -20,18 +21,18 @@ Este problema pertenece a la familia de los **problemas de empaquetado bidimensi
 
 Se implementó un **Algoritmo Genético (GA)** utilizando la biblioteca **DEAP**, ampliamente empleada para prototipar modelos evolutivos.  
 El algoritmo trabaja sobre una **población de individuos**, donde cada individuo representa una posible disposición de las piezas en la tela.  
-El objetivo es minimizar el **ancho total ocupado** por los moldes.
+El objetivo es minimizar el **largo total ocupado** por los moldes.
 
 ---
 
 ## 3. Función objetivo
 
-La función de evaluación `evaluate()` calcula el **ancho total utilizado** por el conjunto de moldes colocados secuencialmente en la franja de tela.  
-Cada polígono se inserta uno a uno en la posición más a la derecha posible sin solaparse con los anteriores.  
+La función de evaluación `evaluate()` calcula el **largo total utilizado** por el conjunto de moldes colocados secuencialmente en la franja de tela.  
+Cada polígono se inserta uno a uno en la posición más a la izquierda posible sin solaparse con los anteriores.  
 
 La métrica de fitness a minimizar es:
 
-fitness = ancho_usado + 0.001 * (1 - área_total / área_utilizada)
+fitness = largo_usado + 0.001 * (1 - área_total / área_utilizada)
 
 
 El segundo término penaliza configuraciones con bajo aprovechamiento del área.
@@ -60,7 +61,7 @@ El proceso de creación de un individuo es el siguiente:
 2. Para cada pieza se calcula su altura (`h`) y se elige una posición vertical aleatoria `y` dentro del rango permitido `[0, STRIP_HEIGHT − h]`.
 3. Se selecciona un ángulo de rotación `φ` aleatorio entre los valores predefinidos.
 
-Esto garantiza que cada individuo inicial sea **válido** (sin piezas fuera del límite vertical) y que exista **diversidad** tanto en el orden como en la orientación de las piezas.
+Esto garantiza que cada individuo inicial sea **válido** (sin piezas fuera del límite vertical) y que exista diversidad tanto en el orden como en la orientación de las piezas.
 
 ---
 
@@ -96,7 +97,7 @@ Se aplican dos posibles tipos de mutación:
 Este operador mantiene siempre la **validez geométrica** del individuo, ya que:
 - las piezas nunca se colocan fuera del rango vertical,
 - el orden sigue siendo una permutación válida,
-- y la variabilidad se conserva al cambiar posiciones o rotaciones.
+- la variabilidad se conserva al cambiar posiciones o rotaciones.
 
 El **swap** actúa a nivel de estructura (exploración global) y el cambio de `y` o `φ` actúa a nivel local (ajuste fino).
 
@@ -119,7 +120,7 @@ Este método equilibra **presión selectiva** y **diversidad poblacional**:
 
 ### 4.5. Evaluación y elitismo
 
-La función de evaluación calcula el **ancho total usado** por la disposición de piezas y penaliza configuraciones con bajo aprovechamiento del área.  
+La función de evaluación calcula el **largo total usado** por la disposición de piezas y penaliza configuraciones con bajo aprovechamiento del área.  
 El algoritmo incorpora además un mecanismo de **elitismo** (`HallOfFame(1)`), garantizando que el mejor individuo de cada generación **no se pierda** durante la reproducción.
 
 ---
@@ -129,11 +130,11 @@ El algoritmo incorpora además un mecanismo de **elitismo** (`HallOfFame(1)`), g
 El código se estructuró de forma modular:
 
 - `cargar_moldes_desde_png()`: lee archivos de imagen `.png` y extrae los contornos vectoriales con **OpenCV** y **Shapely**.  
-  Cada contorno se convierte en un polígono escalado a tamaño real (1 px = 1 cm).
+  Cada contorno se convierte en un polígono escalado a tamaño real (1 px = 1 cm). Como cada imagen tiene 432 píxeles de alto representando 160 cm reales, se aplicó como factor de escalado 160 / 432.
 
 - `place_piece()` y `place_pieces()`: gestionan la ubicación de cada polígono en la tela, verificando solapamientos y aplicando desplazamientos horizontales y verticales según corresponda.
 
-- `evaluate()`: calcula el ancho total y la eficiencia de uso.
+- `evaluate()`: calcula el largo total y la eficiencia de uso.
 
 - `run_ga_for_prenda()`: ejecuta el GA para una prenda específica y retorna el mejor individuo y sus métricas de convergencia.
 
@@ -176,15 +177,63 @@ Se realizaron ajustes experimentales del tamaño de población y del número de 
 
 ---
 
-## 8. Ejecución en Colab
+## 8. Resultados
+
+### 8.1. Evaluación del desempeño del algoritmo
+
+El algoritmo genético fue ejecutado para tres categorías de prendas: calzoncillo, camisa y remera, con una población de 50 individuos y un máximo de 50 generaciones por ejecución. El objetivo fue minimizar el largo total del rollo de tela, manteniendo una altura fija de 150 cm y permitiendo rotaciones de 0°, 90°, 180° y 270° por pieza.
+
+En todas las ejecuciones, el algoritmo mostró una tendencia de convergencia estable, reduciendo progresivamente el valor del fitness (largo total usado) a medida que aumentaban las generaciones. Esto indica que la combinación de operadores genéticos logró equilibrar la exploración y explotación del espacio de búsqueda.
+
+---
+
+### 8.2. Análisis de los gráficos
+
+#### a) Gráficos de convergencia
+
+![conv-calzoncillo](img/conv-calzoncillo.png)
+![conv-camisa](img/conv-camisa.png)
+![conv-remera](img/conv-remera.png)
+
+Los gráficos de convergencia muestran en el eje horizontal las generaciones y en el eje vertical el valor del fitness.
+En todos los casos, la línea azul (mejor fitness) desciende rápidamente en las primeras generaciones y luego se estabiliza, señal de que el algoritmo encuentra configuraciones óptimas tempranas y las refina gradualmente.
+La línea naranja (promedio poblacional) converge hacia valores cercanos al mejor individuo, lo que refleja una población homogénea y un proceso de aprendizaje colectivo dentro de la población.
+
+En particular, la prenda remera presenta una convergencia más rápida debido a la menor cantidad de moldes (12 piezas), mientras que camisa, con 20 moldes y geometrías más irregulares, requiere más generaciones para estabilizar el fitness.
+
+---
+
+#### b) Diagramas de caja
+
+![box-calzoncillo](img/box-calzoncillo.png)
+![box-camisa](img/box-camisa.png)
+![box-remera](img/box-remera.png)
+
+Los diagramas de caja ilustran la distribución de valores de fitness en la última generación.
+En los tres casos, se observa una disminución de la dispersión con respecto a generaciones anteriores, indicando que la población converge hacia soluciones similares.
+Las medianas (líneas rojas) cercanas a los mínimos absolutos demuestran que la mayoría de los individuos alcanzan configuraciones eficientes, confirmando la robustez del proceso evolutivo y la baja presencia de valores atípicos.
+
+---
+
+#### c) Layout final
+
+![layout](img/layout.png)
+
+El layout final muestra la disposición óptima de todas las piezas en el rollo, diferenciadas por color según el talle (P, M, G).
+Las líneas punteadas verticales dividen las secciones asignadas a cada tipo de prenda, manteniendo márgenes regulares y evitando superposiciones.
+El largo total final alcanzado fue de 578.59 cm, lo que representa la longitud mínima necesaria para ubicar todas las prendas considerando las restricciones geométricas y de separación (1 cm entre prendas).
+
+Visualmente, el diseño demuestra una buena compactación de moldes y una utilización eficiente del espacio, cumpliendo con el objetivo principal del trabajo.
+
+---
+
+## 9. Ejecución en Colab
 
 El script fue diseñado para ejecutarse en **Google Colab** sin dependencias externas adicionales, utilizando solo bibliotecas disponibles por defecto en entornos científicos de Python (DEAP, Shapely, OpenCV, Matplotlib).
 
 ---
 
-## 9. Conclusiones parciales
+## 10. Conclusiones
 
 El modelo implementado permite resolver de forma eficiente un problema de corte bidimensional mediante **Algoritmos Genéticos**, obteniendo configuraciones válidas y eficientes de moldes.  
 El enfoque propuesto es fácilmente extensible a otros materiales o restricciones geométricas (rotaciones libres, agrupamiento por tipo de tejido, etc.).
-
-Los resultados cuantitativos y las curvas de convergencia finales se incluirán en la siguiente versión del informe, una vez completadas las ejecuciones finales.
