@@ -140,7 +140,8 @@ El código se estructuró de forma modular:
 
 - `plot_convergence()` y `plot_boxplot()`: generan los gráficos de evolución y dispersión del fitness, requeridos por el desafío.
 
-La estructura principal recorre las tres prendas del dataset (`calzoncillo`, `camisa`, `remera`) y aplica el proceso de optimización de forma independiente a cada una, concatenando luego los resultados sobre una misma “tela” virtual.
+La estructura principal recorre las tres prendas del dataset (`calzoncillo`, `camisa`, `remera`) y aplica el proceso de optimización de forma independiente a cada una, concatenando luego los resultados sobre una misma “tela” virtual. Es importante destacar que los moldes de distintas prendas no deben mezclarse, ya que esto permite estimar de forma separada el consumo y costo de tela por prenda.
+No obstante, dentro de una misma prenda, los moldes de distintos talles pueden combinarse, dado que pertenecen al mismo tipo de confección y comparten las mismas proporciones geométricas.
 
 ---
 
@@ -221,7 +222,7 @@ Las medianas (líneas rojas) cercanas a los mínimos absolutos demuestran que la
 
 El layout final muestra la disposición óptima de todas las piezas en el rollo, diferenciadas por color según el talle (P, M, G).
 Las líneas punteadas verticales dividen las secciones asignadas a cada tipo de prenda, manteniendo márgenes regulares y evitando superposiciones.
-El largo total final alcanzado fue de 578.59 cm, lo que representa la longitud mínima necesaria para ubicar todas las prendas considerando las restricciones geométricas y de separación (1 cm entre prendas).
+El largo total final alcanzado fue de 535.63 cm cm, lo que representa la longitud mínima necesaria para ubicar todas las prendas considerando las restricciones geométricas y de separación (1 cm entre prendas).
 
 Visualmente, el diseño demuestra una buena compactación de moldes y una utilización eficiente del espacio, cumpliendo con el objetivo principal del trabajo.
 
